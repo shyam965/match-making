@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // remove output, or set to default
+  // output   = "../generated/prisma"   <-- REMOVE THIS LINE
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Users {
+  // ===== Phase 1: Basic details =====
+  id        Int      @id @default(autoincrement())
+
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("user") // user, admin, moderator, superadmin, concierge
+  createdAt DateTime @default(now())
+
+  // ===== Phase 2: Personal details =====
+  gender          String?
+  dob             DateTime?
+  mother_tongue   String?   // dropdown
+  religion        String?  // dropdown
+  merital_status  String?  // dropdown (typo: "marital_status")
+  caste           String?  // dropdown
+  country         String?
+  state           String?
+  city            String?
+  employeeIn      String?
+
+  // ===== Phase 3: Family & KYC =====
+  family_type        String?
+  father_occupation  String?
+  mother_occupation  String?
+  brother            Int?     // changed from Number → Int
+  sister             Int?     // changed from Number → Int
+  family_living      String?
+  address            String?
+  kyc                Boolean  @default(false)
+
+  @@map("users") 
+}
+
+
+//profile
+
+
+
+
+
+
+
+
