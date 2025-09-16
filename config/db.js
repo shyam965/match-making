@@ -11,4 +11,5 @@ const connectDb = async () => {
   }
 };
 
-export { prisma, connectDb };
+export  { prisma, connectDb };
+

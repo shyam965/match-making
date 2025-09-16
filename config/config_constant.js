@@ -16,6 +16,9 @@ const ContentTypes = Object.freeze({
 const CollectionNames = Object.freeze({
 
   USERS: "users",
+  LIKE:"likes",
+  MATCHES:"matches"
+  
   
 });
 

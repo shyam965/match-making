@@ -1,21 +1,27 @@
 
-import express from "express"
-import dotenv from "dotenv"
+
+
+
+import express from "express";
+import dotenv from "dotenv";
 import cors from "cors";
 import { connectDb } from "./config/db.js";
 import userRouter from "./routes/user.routes.js";
+import chatRouter from "./routes/chat.routes.js";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
+import { createSuperAdmin } from "./seed.js";
+import { createServer } from "http";
+import { initSocket } from "./socket/chat.socket.js";
 
-const app = express()
+const app = express();
 dotenv.config();
 
 app.use(cookieParser());
-// databse connection 
 
+// databse connection
 connectDb();
-
 
 // middleware
 const __filename = fileURLToPath(import.meta.url);
@@ -30,14 +36,20 @@ app.use(
     })
 );
 
-const port = process.env.PORT || 9000
-
-
+const port = process.env.PORT || 9000;
+createSuperAdmin();
 
 app.get("/", (_, res) => {
-    res.json({ msg: "api is working" })
+    res.json({ msg: "api is working" });
 });
 
 app.use("/api/user", userRouter);
+app.use("/api/chat", chatRouter);
 
-app.listen(port, () => console.log(`server started on port ${port}`));
+
+const server = createServer(app);
+
+
+initSocket(server);
+
+server.listen(port, () => console.log(`server started on port ${port}`));

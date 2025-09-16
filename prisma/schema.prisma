@@ -1,13 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  // remove output, or set to default
-  // output   = "../generated/prisma"   <-- REMOVE THIS LINE
 }
 
 datasource db {
@@ -15,49 +7,101 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model Users {
-  // ===== Phase 1: Basic details =====
-  id        Int      @id @default(autoincrement())
+  id                Int       @id @default(autoincrement())
+  name              String
+  email             String    @unique
+  password          String
+  role              String    @default("user")
+  createdAt         DateTime  @default(now())
+  phone             String?
+  gender            String?
+  dob               DateTime?
+  mother_tongue     String?
+  religion          String?
+  marital_status    String?
+  caste             String?
+  country           String?
+  state             String?
+  city              String?
+  employeeIn        String?
+  family_type       String?
+  father_occupation String?
+  mother_occupation String?
+  brother           Int?
+  sister            Int?
+  family_living     String?
+  address           String?
+  kyc               Boolean   @default(false)
+  images            String[]
 
-  name      String
-  email     String   @unique
-  password  String
-  role      String   @default("user") // user, admin, moderator, superadmin, concierge
+  // relations
+  sentMessages Message[]  @relation("SentMessages")
+  chatRoomsOne ChatRoom[] @relation("UserOne")
+  chatRoomsTwo ChatRoom[] @relation("UserTwo")
+
+  // Like relations 👇
+  likesSent     Like[] @relation("LikesSent")
+  likesReceived Like[] @relation("LikesReceived")
+
+    // Match relations 👇
+  matchesAsUser1 Matches[] @relation("User1Matches")
+  matchesAsUser2 Matches[] @relation("User2Matches")
+
+  @@map("users")
+}
+
+model Like {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  likedUserId Int
+  createdAt   DateTime @default(now())
+
+  // relations
+  user      Users @relation("LikesSent", fields: [userId], references: [id])
+  likedUser Users @relation("LikesReceived", fields: [likedUserId], references: [id])
+
+  @@unique([userId, likedUserId])
+  @@map("likes")
+}
+
+model Matches {
+  id        Int      @id @default(autoincrement())
+  user1Id   Int
+  user2Id   Int
   createdAt DateTime @default(now())
 
-  // ===== Phase 2: Personal details =====
-  gender          String?
-  dob             DateTime?
-  mother_tongue   String?   // dropdown
-  religion        String?  // dropdown
-  merital_status  String?  // dropdown (typo: "marital_status")
-  caste           String?  // dropdown
-  country         String?
-  state           String?
-  city            String?
-  employeeIn      String?
+  // relations
+  user1 Users @relation("User1Matches", fields: [user1Id], references: [id])
+  user2 Users @relation("User2Matches", fields: [user2Id], references: [id])
 
-  // ===== Phase 3: Family & KYC =====
-  family_type        String?
-  father_occupation  String?
-  mother_occupation  String?
-  brother            Int?     // changed from Number → Int
-  sister             Int?     // changed from Number → Int
-  family_living      String?
-  address            String?
-  kyc                Boolean  @default(false)
-
-  @@map("users") 
+  @@unique([user1Id, user2Id])
+  @@map("matches")
 }
 
 
-//profile
 
+model ChatRoom {
+  id        Int       @id @default(autoincrement())
+  userOneId Int
+  userTwoId Int
+  userOne   Users     @relation("UserOne", fields: [userOneId], references: [id])
+  userTwo   Users     @relation("UserTwo", fields: [userTwoId], references: [id])
+  messages  Message[]
+  createdAt DateTime  @default(now())
 
+  @@unique([userOneId, userTwoId]) // ensure same 2 users ka duplicate room na bane
+  @@map("chatrooms")
+}
 
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  senderId  Int
+  chatId    Int
+  sender    Users    @relation("SentMessages", fields: [senderId], references: [id])
+  chatRoom  ChatRoom @relation(fields: [chatId], references: [id])
+  createdAt DateTime @default(now())
 
-
-
-
-
+  @@map("messages")
+}
